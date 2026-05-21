@@ -1,0 +1,44 @@
+import type { Puzzle } from "../types/game";
+
+export const fallbackPuzzles: Puzzle[] = [
+  {
+    id: "cadillac-escalade-2006",
+    date: "2026-05-21",
+    answer: {
+      make: "Cadillac",
+      model: "Escalade",
+      year: 2006,
+    },
+    reveals: [
+      "/cars/cadillac-escalade-2006/reveal-1.webp",
+      "/cars/cadillac-escalade-2006/reveal-2.webp",
+      "/cars/cadillac-escalade-2006/reveal-3.webp",
+      "/cars/cadillac-escalade-2006/reveal-4.webp",
+      "/cars/cadillac-escalade-2006/reveal-5.webp",
+    ],
+    fullImage: "/cars/cadillac-escalade-2006/full.webp",
+    credit: "Demo image credit",
+    source: "Demo source",
+    license: "Demo license",
+  },
+  {
+    id: "porsche-911-gt3-2022",
+    date: "2026-05-22",
+    answer: {
+      make: "Porsche",
+      model: "911 GT3",
+      year: 2022,
+    },
+    reveals: [
+      "/cars/porsche-911-gt3-2022/reveal-1.webp",
+      "/cars/porsche-911-gt3-2022/reveal-2.webp",
+      "/cars/porsche-911-gt3-2022/reveal-3.webp",
+      "/cars/porsche-911-gt3-2022/reveal-4.webp",
+      "/cars/porsche-911-gt3-2022/reveal-5.webp",
+    ],
+    fullImage: "/cars/porsche-911-gt3-2022/full.webp",
+    credit: "Demo image credit",
+    source: "Demo source",
+    license: "Demo license",
+  },
+];
