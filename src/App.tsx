@@ -14,17 +14,24 @@ import {
   turnsLeft as turnsLeftFn,
 } from "./lib/game";
 import { bankedDots, finalScore, multiplierFor } from "./lib/scoring";
+import { loadGameState, saveGameState } from "./lib/storage";
 import type { Guess } from "./types/game";
 
 const STREAK = 3;
 
 function App() {
   const puzzle = fallbackPuzzles[0];
-  const [state, setState] = useState(() => createInitialState(puzzle.id));
+  const [state, setState] = useState(
+    () => loadGameState(puzzle.id) ?? createInitialState(puzzle.id),
+  );
   const [modalOpen, setModalOpen] = useState(false);
 
   const done = state.status !== "playing";
   const won = state.status === "won";
+
+  useEffect(() => {
+    saveGameState(puzzle.id, state);
+  }, [puzzle.id, state]);
 
   useEffect(() => {
     if (done) {
