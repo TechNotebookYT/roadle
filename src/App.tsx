@@ -3,6 +3,8 @@ import Game from "./components/Game";
 import { loadManifest } from "./lib/manifest";
 import { loadModelCatalog, type ModelCatalog } from "./lib/models";
 import { loadGameState } from "./lib/storage";
+import { finalScore } from "./lib/scoring";
+import { initialTheme, persistTheme, type Theme } from "./lib/theme";
 import type { Puzzle } from "./types/game";
 
 function computeCompletedIds(puzzles: Puzzle[]): string[] {
@@ -14,12 +16,35 @@ function computeCompletedIds(puzzles: Puzzle[]): string[] {
     .map((p) => p.id);
 }
 
+function computeTotalPoints(puzzles: Puzzle[]): number {
+  let total = 0;
+  for (const p of puzzles) {
+    const s = loadGameState(p.id);
+    if (!s || s.status === "playing") continue;
+    total += finalScore(s.guesses, s.status === "won");
+  }
+  return total;
+}
+
 function App() {
   const [puzzles, setPuzzles] = useState<Puzzle[]>([]);
   const [models, setModels] = useState<ModelCatalog>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [completedTick, setCompletedTick] = useState(0);
+  const [theme, setTheme] = useState<Theme>(() => initialTheme());
+
+  useEffect(() => {
+    persistTheme(theme);
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-theme", theme);
+      document.documentElement.style.colorScheme = theme;
+    }
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((t) => (t === "light" ? "dark" : "light"));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,7 +71,12 @@ function App() {
 
   const completedIds = useMemo(
     () => computeCompletedIds(puzzles),
-    // completedTick is a manual refresh trigger from Game state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [puzzles, completedTick],
+  );
+
+  const totalPoints = useMemo(
+    () => computeTotalPoints(puzzles),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [puzzles, completedTick],
   );
@@ -55,9 +85,11 @@ function App() {
     setCompletedTick((n) => n + 1);
   }, []);
 
-  if (loadError) return <CenteredMessage text="No puzzles available." />;
+  if (loadError)
+    return <CenteredMessage text="No puzzles available." theme={theme} />;
   const puzzle = puzzles.find((p) => p.id === selectedId);
-  if (!puzzle || !selectedId) return <CenteredMessage text="Loading…" />;
+  if (!puzzle || !selectedId)
+    return <CenteredMessage text="Loading…" theme={theme} />;
 
   return (
     <Game
@@ -65,16 +97,19 @@ function App() {
       puzzles={puzzles}
       models={models}
       completedIds={completedIds}
+      totalPoints={totalPoints}
       onSelectPuzzle={setSelectedId}
       onGameUpdate={refreshCompleted}
+      theme={theme}
+      onToggleTheme={toggleTheme}
     />
   );
 }
 
-function CenteredMessage({ text }: { text: string }) {
+function CenteredMessage({ text, theme }: { text: string; theme: Theme }) {
   return (
     <div
-      data-theme="light"
+      data-theme={theme}
       style={{
         minHeight: "100vh",
         background: "var(--bg)",

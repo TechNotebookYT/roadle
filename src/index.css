@@ -144,3 +144,135 @@ input:focus-visible {
   background: var(--accent);
   color: #fff;
 }
+
+@keyframes roadle-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes roadle-cell-in {
+  from {
+    opacity: 0;
+    transform: translateX(-14px) scale(0.92);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes roadle-img-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes roadle-img-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.roadle-cell-anim {
+  animation: roadle-cell-in 0.55s cubic-bezier(0.22, 0.9, 0.28, 1) both;
+}
+
+.roadle-no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.roadle-no-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+@keyframes roadle-confetti-fall {
+  0% {
+    transform: translate3d(0, -20px, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 108vh, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes roadle-confetti-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(720deg);
+  }
+}
+
+@keyframes roadle-flash {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes roadle-flag-wave {
+  0%,
+  100% {
+    transform: translateY(0) skewY(0deg);
+  }
+  25% {
+    transform: translateY(-9px) skewY(-2.5deg);
+  }
+  50% {
+    transform: translateY(0) skewY(0deg);
+  }
+  75% {
+    transform: translateY(9px) skewY(2.5deg);
+  }
+}
+
+@keyframes roadle-flag-enter {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 18px) rotate(-6deg) scale(0.88);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes roadle-flag-exit {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -8px) rotate(2deg) scale(0.96);
+  }
+}

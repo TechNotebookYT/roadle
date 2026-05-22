@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Layout from "./Layout";
 import HeaderBar from "./HeaderBar";
 import TopBar from "./TopBar";
@@ -7,6 +7,8 @@ import ScorePanel from "./ScorePanel";
 import GuessGrid from "./GuessGrid";
 import GuessForm from "./GuessForm";
 import ResultModal from "./ResultModal";
+import HowToPlay from "./HowToPlay";
+import WinFX from "./WinFX";
 import {
   MAX_ATTEMPTS,
   activeRevealIndex,
@@ -17,6 +19,7 @@ import {
 import { bankedDots, finalScore, multiplierFor } from "../lib/scoring";
 import { loadGameState, saveGameState } from "../lib/storage";
 import type { ModelCatalog } from "../lib/models";
+import type { Theme } from "../lib/theme";
 import type { Guess, Puzzle } from "../types/game";
 
 export default function Game({
@@ -24,24 +27,36 @@ export default function Game({
   puzzles,
   models,
   completedIds,
+  totalPoints,
   onSelectPuzzle,
   onGameUpdate,
+  theme,
+  onToggleTheme,
 }: {
   puzzle: Puzzle;
   puzzles: Puzzle[];
   models: ModelCatalog;
   completedIds: string[];
+  totalPoints: number;
   onSelectPuzzle: (id: string) => void;
   onGameUpdate: () => void;
+  theme: Theme;
+  onToggleTheme: () => void;
 }) {
   const [state, setState] = useState(
     () => loadGameState(puzzle.id) ?? createInitialState(puzzle.id),
   );
   const [modalOpen, setModalOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [howToOpen, setHowToOpen] = useState(false);
+  const [winTrigger, setWinTrigger] = useState(0);
+  const [perfectWin, setPerfectWin] = useState(false);
+  const prevStatusRef = useRef(state.status);
 
   useEffect(() => {
     setState(loadGameState(puzzle.id) ?? createInitialState(puzzle.id));
     setModalOpen(false);
+    prevStatusRef.current = "playing";
   }, [puzzle.id]);
 
   const done = state.status !== "playing";
@@ -53,19 +68,34 @@ export default function Game({
   }, [puzzle.id, state, onGameUpdate]);
 
   useEffect(() => {
+    const prev = prevStatusRef.current;
+    prevStatusRef.current = state.status;
+    if (prev === "playing" && state.status === "won") {
+      setPerfectWin(state.guesses.length === 1);
+      setWinTrigger((n) => n + 1);
+    }
+  }, [state.status, state.guesses.length]);
+
+  useEffect(() => {
     if (done) {
-      const t = setTimeout(() => setModalOpen(true), 600);
+      const delay = won && state.guesses.length === 1 ? 2400 : 1200;
+      const t = setTimeout(() => setModalOpen(true), delay);
       return () => clearTimeout(t);
     }
-  }, [done]);
+  }, [done, won, state.guesses.length]);
 
   function handleSubmit(g: Guess) {
     setState((prev) => submitGuess(prev, g, puzzle));
   }
 
-  function handlePlayAgain() {
+  function handlePlayAnother() {
     setModalOpen(false);
-    setTimeout(() => setState(createInitialState(puzzle.id)), 300);
+    setTimeout(() => setPickerOpen(true), 320);
+  }
+
+  function handleSelectPuzzle(id: string) {
+    setPickerOpen(false);
+    onSelectPuzzle(id);
   }
 
   const turnsLeft = turnsLeftFn(state);
@@ -87,13 +117,19 @@ export default function Game({
   );
 
   return (
-    <Layout>
+    <Layout theme={theme} onHowToPlay={() => setHowToOpen(true)}>
       <HeaderBar
         completed={completedIds.length}
+        totalPoints={totalPoints}
         puzzles={puzzles}
         selectedId={puzzle.id}
-        onSelectPuzzle={onSelectPuzzle}
+        onSelectPuzzle={handleSelectPuzzle}
         completedIds={completedIds}
+        pickerOpen={pickerOpen}
+        onPickerOpen={() => setPickerOpen(true)}
+        onPickerClose={() => setPickerOpen(false)}
+        theme={theme}
+        onToggleTheme={onToggleTheme}
       />
       <div className="roadle-grid">
         <div className="roadle-left">
@@ -163,8 +199,12 @@ export default function Game({
         streak={completedIds.length}
         maxAttempts={MAX_ATTEMPTS}
         onClose={() => setModalOpen(false)}
-        onPlayAgain={handlePlayAgain}
+        onPlayAnother={handlePlayAnother}
       />
+
+      <HowToPlay open={howToOpen} onClose={() => setHowToOpen(false)} />
+
+      <WinFX trigger={winTrigger} perfect={perfectWin} />
     </Layout>
   );
 }

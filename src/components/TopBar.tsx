@@ -31,7 +31,7 @@ export default function TopBar() {
           letterSpacing: "-.01em",
         }}
       >
-        A daily car puzzle.
+        Test your car-spotting skills.
       </p>
     </div>
   );
