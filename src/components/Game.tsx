@@ -60,6 +60,18 @@ export default function Game({ puzzle }: { puzzle: Puzzle }) {
   const revealIdx = activeRevealIndex(state, puzzle.reveals.length);
   const score = finalScore(state.guesses, won);
 
+  const locked = state.guesses.reduce(
+    (acc, g) => ({
+      make: acc.make || (g.feedback.make === "correct" ? g.guess.make : ""),
+      model:
+        acc.model || (g.feedback.model === "correct" ? g.guess.model : ""),
+      year:
+        acc.year ||
+        (g.feedback.year === "correct" ? String(g.guess.year) : ""),
+    }),
+    { make: "", model: "", year: "" },
+  );
+
   return (
     <Layout>
       <HeaderBar streak={STREAK} puzzleLabel={puzzle.date} />
@@ -88,7 +100,7 @@ export default function Game({ puzzle }: { puzzle: Puzzle }) {
               style={{
                 margin: 0,
                 fontFamily: "var(--display)",
-                fontSize: 22,
+                fontSize: 20,
                 fontWeight: 700,
                 letterSpacing: "-.025em",
                 color: "var(--ink)",
@@ -116,6 +128,7 @@ export default function Game({ puzzle }: { puzzle: Puzzle }) {
             multiplier={multiplier}
             disabled={done}
             onSubmit={handleSubmit}
+            locked={locked}
           />
         </div>
       </div>

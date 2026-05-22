@@ -1,7 +1,7 @@
 [
   {
     "id": "cadillac-escalade-2006",
-    "date": "2026-05-21",
+    "date": "2026-05-25",
     "answer": {
       "make": "Cadillac",
       "model": "Escalade",
@@ -58,5 +58,22 @@
     "credit": "Demo image credit",
     "source": "Demo source",
     "license": "Demo license"
+  },
+  {
+    "id": "chevrolet-bolt-2017",
+    "date": "2026-05-21",
+    "answer": {
+      "make": "Chevrolet",
+      "model": "Bolt",
+      "year": 2017
+    },
+    "reveals": [
+      "/cars/game1/reveal-1.webp",
+      "/cars/game1/reveal-2.webp",
+      "/cars/game1/reveal-3.webp",
+      "/cars/game1/reveal-4.webp",
+      "/cars/game1/reveal-5.webp"
+    ],
+    "fullImage": "/cars/game1/full.webp"
   }
 ]

@@ -12,7 +12,7 @@ export default function TopBar() {
         style={{
           margin: 0,
           fontFamily: "var(--display)",
-          fontSize: "clamp(44px, 5.6vw, 64px)",
+          fontSize: "clamp(36px, 4.6vw, 52px)",
           fontWeight: 700,
           letterSpacing: "-.045em",
           color: "var(--ink)",
@@ -25,7 +25,7 @@ export default function TopBar() {
         style={{
           margin: 0,
           fontFamily: "var(--ui)",
-          fontSize: 17,
+          fontSize: 15,
           fontWeight: 400,
           color: "var(--body)",
           letterSpacing: "-.01em",

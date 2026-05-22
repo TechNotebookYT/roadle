@@ -250,7 +250,7 @@ export default function CarReveal({
             fontVariantNumeric: "tabular-nums",
           }}
         >
-          №{puzzle.id.slice(0, 6)} · {puzzle.date}
+          {puzzle.date}
         </div>
       </div>
     </div>

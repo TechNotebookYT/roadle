@@ -35,8 +35,7 @@ export function checkYear(
   tolerance: number = YEAR_TOLERANCE,
 ): "correct" | "close" | "wrong" {
   if (!Number.isFinite(guess)) return "wrong";
-  if (guess === answer) return "correct";
-  if (Math.abs(guess - answer) <= tolerance) return "close";
+  if (Math.abs(guess - answer) <= tolerance) return "correct";
   return "wrong";
 }
 

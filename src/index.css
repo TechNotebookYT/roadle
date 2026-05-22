@@ -21,41 +21,41 @@ body {
 .roadle-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-  gap: 40px;
+  gap: 32px;
   align-items: start;
 }
 
 .roadle-left {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 18px;
   position: sticky;
-  top: 32px;
+  top: 20px;
 }
 
 .roadle-right {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
 }
 
 .roadle-shell {
-  max-width: 1240px;
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 40px 32px 64px;
+  padding: 24px 24px 48px;
 }
 
 @media (max-width: 880px) {
   .roadle-grid {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 20px;
   }
   .roadle-left {
     position: static;
     top: auto;
   }
   .roadle-shell {
-    padding: 16px 20px 64px;
+    padding: 14px 18px 56px;
   }
 }
 

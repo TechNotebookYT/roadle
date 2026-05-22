@@ -3,6 +3,12 @@ import { BRANDS } from "../data/brands";
 import { FieldShell, inputStyle } from "./atoms";
 import type { Guess } from "../types/game";
 
+export type LockedFields = {
+  make?: string;
+  model?: string;
+  year?: string;
+};
+
 const norm = (s: string) => (s || "").trim().toLowerCase();
 
 function BrandCombobox({
@@ -134,14 +140,30 @@ export default function GuessForm({
   multiplier,
   disabled,
   onSubmit,
+  locked,
 }: {
   multiplier: number;
   disabled: boolean;
   onSubmit: (g: Guess) => void;
+  locked?: LockedFields;
 }) {
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
   const [year, setYear] = useState("");
+
+  useEffect(() => {
+    if (locked?.make) setMake(locked.make);
+  }, [locked?.make]);
+  useEffect(() => {
+    if (locked?.model) setModel(locked.model);
+  }, [locked?.model]);
+  useEffect(() => {
+    if (locked?.year) setYear(locked.year);
+  }, [locked?.year]);
+
+  const makeLocked = Boolean(locked?.make);
+  const modelLocked = Boolean(locked?.model);
+  const yearLocked = Boolean(locked?.year);
 
   const canSubmit =
     !disabled &&
@@ -156,8 +178,8 @@ export default function GuessForm({
       model: model.trim(),
       year: parseInt(year.trim(), 10),
     });
-    setModel("");
-    setYear("");
+    if (!modelLocked) setModel("");
+    if (!yearLocked) setYear("");
   }
 
   function onKeyDown(e: React.KeyboardEvent) {
@@ -169,11 +191,15 @@ export default function GuessForm({
       style={{ display: "flex", flexDirection: "column", gap: 10 }}
       onKeyDown={onKeyDown}
     >
-      <BrandCombobox value={make} onChange={setMake} disabled={disabled} />
+      <BrandCombobox
+        value={make}
+        onChange={setMake}
+        disabled={disabled || makeLocked}
+      />
       <FieldShell label="Model">
         <input
           value={model}
-          disabled={disabled}
+          disabled={disabled || modelLocked}
           onChange={(e) => setModel(e.target.value)}
           placeholder="e.g. M3, Civic, F-150"
           style={inputStyle}
@@ -182,7 +208,7 @@ export default function GuessForm({
       <FieldShell label="Year">
         <input
           value={year}
-          disabled={disabled}
+          disabled={disabled || yearLocked}
           onChange={(e) =>
             setYear(e.target.value.replace(/[^\d]/g, "").slice(0, 4))
           }

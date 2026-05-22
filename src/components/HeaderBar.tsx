@@ -15,7 +15,7 @@ export default function HeaderBar({
         alignItems: "center",
         justifyContent: "space-between",
         gap: 12,
-        padding: "4px 4px 24px",
+        padding: "4px 4px 16px",
       }}
     >
       <span
