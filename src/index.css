@@ -5,11 +5,58 @@ body {
 }
 
 body {
-  background: var(--bg);
+  min-height: 100vh;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(900px 600px at 8% -10%, rgba(0, 122, 255, 0.16), transparent 60%),
+    radial-gradient(700px 500px at 105% 5%, rgba(255, 159, 10, 0.14), transparent 60%),
+    radial-gradient(800px 800px at 50% 120%, rgba(191, 90, 242, 0.12), transparent 60%);
+  background-attachment: fixed;
   color: var(--ink);
   font-family: var(--ui);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.roadle-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+
+.roadle-left {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  position: sticky;
+  top: 32px;
+}
+
+.roadle-right {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.roadle-shell {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 40px 32px 64px;
+}
+
+@media (max-width: 880px) {
+  .roadle-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .roadle-left {
+    position: static;
+    top: auto;
+  }
+  .roadle-shell {
+    padding: 16px 20px 64px;
+  }
 }
 
 * {

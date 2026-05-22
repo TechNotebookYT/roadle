@@ -241,11 +241,12 @@ export default function CarReveal({
         </div>
         <div
           style={{
-            fontFamily: "var(--ui)",
-            fontSize: 12,
+            fontFamily: "var(--mono)",
+            fontSize: 11,
             fontWeight: 500,
             color: "var(--muted)",
-            letterSpacing: "-.005em",
+            letterSpacing: ".08em",
+            textTransform: "uppercase",
             fontVariantNumeric: "tabular-nums",
           }}
         >
