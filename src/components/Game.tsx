@@ -16,11 +16,24 @@ import {
 } from "../lib/game";
 import { bankedDots, finalScore, multiplierFor } from "../lib/scoring";
 import { loadGameState, saveGameState } from "../lib/storage";
+import type { ModelCatalog } from "../lib/models";
 import type { Guess, Puzzle } from "../types/game";
 
-const STREAK = 3;
-
-export default function Game({ puzzle }: { puzzle: Puzzle }) {
+export default function Game({
+  puzzle,
+  puzzles,
+  models,
+  completedIds,
+  onSelectPuzzle,
+  onGameUpdate,
+}: {
+  puzzle: Puzzle;
+  puzzles: Puzzle[];
+  models: ModelCatalog;
+  completedIds: string[];
+  onSelectPuzzle: (id: string) => void;
+  onGameUpdate: () => void;
+}) {
   const [state, setState] = useState(
     () => loadGameState(puzzle.id) ?? createInitialState(puzzle.id),
   );
@@ -36,7 +49,8 @@ export default function Game({ puzzle }: { puzzle: Puzzle }) {
 
   useEffect(() => {
     saveGameState(puzzle.id, state);
-  }, [puzzle.id, state]);
+    onGameUpdate();
+  }, [puzzle.id, state, onGameUpdate]);
 
   useEffect(() => {
     if (done) {
@@ -74,7 +88,13 @@ export default function Game({ puzzle }: { puzzle: Puzzle }) {
 
   return (
     <Layout>
-      <HeaderBar streak={STREAK} puzzleLabel={puzzle.date} />
+      <HeaderBar
+        completed={completedIds.length}
+        puzzles={puzzles}
+        selectedId={puzzle.id}
+        onSelectPuzzle={onSelectPuzzle}
+        completedIds={completedIds}
+      />
       <div className="roadle-grid">
         <div className="roadle-left">
           <TopBar />
@@ -129,6 +149,7 @@ export default function Game({ puzzle }: { puzzle: Puzzle }) {
             disabled={done}
             onSubmit={handleSubmit}
             locked={locked}
+            models={models}
           />
         </div>
       </div>
@@ -139,7 +160,7 @@ export default function Game({ puzzle }: { puzzle: Puzzle }) {
         puzzle={puzzle}
         guesses={state.guesses}
         score={score}
-        streak={STREAK}
+        streak={completedIds.length}
         maxAttempts={MAX_ATTEMPTS}
         onClose={() => setModalOpen(false)}
         onPlayAgain={handlePlayAgain}

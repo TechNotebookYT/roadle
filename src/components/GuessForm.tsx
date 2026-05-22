@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BRANDS } from "../data/brands";
+import type { ModelCatalog } from "../lib/models";
+import { makesFromCatalog } from "../lib/models";
 import { FieldShell, inputStyle } from "./atoms";
 import type { Guess } from "../types/game";
 
@@ -11,18 +12,28 @@ export type LockedFields = {
 
 const norm = (s: string) => (s || "").trim().toLowerCase();
 
-function BrandCombobox({
+function Combobox({
+  label,
   value,
   onChange,
+  options,
+  placeholder,
   disabled,
+  emptyHint,
 }: {
+  label: string;
   value: string;
   onChange: (v: string) => void;
+  options: string[];
+  placeholder: string;
   disabled?: boolean;
+  emptyHint?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState(value || "");
+  const [highlight, setHighlight] = useState(-1);
   const ref = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   useEffect(() => {
     setQ(value || "");
@@ -38,13 +49,55 @@ function BrandCombobox({
 
   const matches = useMemo(() => {
     const n = norm(q);
-    if (!n) return BRANDS;
-    return BRANDS.filter((b) => norm(b).includes(n));
-  }, [q]);
+    if (!n) return options;
+    return options.filter((o) => norm(o).includes(n));
+  }, [q, options]);
+
+  useEffect(() => {
+    setHighlight(-1);
+  }, [q, options]);
+
+  useEffect(() => {
+    if (highlight < 0) return;
+    const el = itemRefs.current[highlight];
+    if (el) el.scrollIntoView({ block: "nearest" });
+  }, [highlight]);
+
+  function pick(o: string) {
+    onChange(o);
+    setQ(o);
+    setOpen(false);
+    setHighlight(-1);
+  }
+
+  function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (disabled) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (matches.length === 0) return;
+      setOpen(true);
+      setHighlight((i) => (i < 0 ? 0 : Math.min(i + 1, matches.length - 1)));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (matches.length === 0) return;
+      setHighlight((i) => (i <= 0 ? 0 : i - 1));
+    } else if (e.key === "Enter") {
+      if (open && highlight >= 0 && highlight < matches.length) {
+        e.preventDefault();
+        e.stopPropagation();
+        pick(matches[highlight]);
+      }
+    } else if (e.key === "Escape") {
+      setOpen(false);
+      setHighlight(-1);
+    }
+  }
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
-      <FieldShell label="Make">
+      <FieldShell label={label}>
         <input
           value={q}
           disabled={disabled}
@@ -54,7 +107,8 @@ function BrandCombobox({
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
-          placeholder="Search brand…"
+          onKeyDown={onKeyDown}
+          placeholder={placeholder}
           style={inputStyle}
         />
         <span
@@ -83,7 +137,18 @@ function BrandCombobox({
             boxShadow: "var(--shadow-pop)",
           }}
         >
-          {matches.length === 0 && (
+          {options.length === 0 && (
+            <div
+              style={{
+                padding: "12px 14px",
+                color: "var(--muted)",
+                fontSize: 13,
+              }}
+            >
+              {emptyHint ?? "No options"}
+            </div>
+          )}
+          {options.length > 0 && matches.length === 0 && (
             <div
               style={{
                 padding: "12px 14px",
@@ -94,14 +159,14 @@ function BrandCombobox({
               No matches
             </div>
           )}
-          {matches.map((b) => (
+          {matches.map((o, i) => (
             <div
-              key={b}
-              onClick={() => {
-                onChange(b);
-                setQ(b);
-                setOpen(false);
+              key={o}
+              ref={(el) => {
+                itemRefs.current[i] = el;
               }}
+              onClick={() => pick(o)}
+              onMouseEnter={() => setHighlight(i)}
               style={{
                 padding: "10px 14px",
                 cursor: "pointer",
@@ -110,15 +175,10 @@ function BrandCombobox({
                 justifyContent: "space-between",
                 alignItems: "center",
                 borderBottom: "1px solid var(--line-soft)",
+                background: i === highlight ? "var(--hover)" : "transparent",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "var(--hover)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "transparent")
-              }
             >
-              <span>{b}</span>
+              <span>{o}</span>
               <span
                 style={{
                   fontFamily: "var(--mono)",
@@ -141,11 +201,13 @@ export default function GuessForm({
   disabled,
   onSubmit,
   locked,
+  models,
 }: {
   multiplier: number;
   disabled: boolean;
   onSubmit: (g: Guess) => void;
   locked?: LockedFields;
+  models: ModelCatalog;
 }) {
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
@@ -164,6 +226,27 @@ export default function GuessForm({
   const makeLocked = Boolean(locked?.make);
   const modelLocked = Boolean(locked?.model);
   const yearLocked = Boolean(locked?.year);
+
+  const makeOptions = useMemo(() => makesFromCatalog(models), [models]);
+  const matchedMakeKey = useMemo(() => {
+    const n = norm(make);
+    return makeOptions.find((m) => norm(m) === n) ?? "";
+  }, [make, makeOptions]);
+  const modelOptions = useMemo(
+    () => (matchedMakeKey ? (models[matchedMakeKey] ?? []) : []),
+    [matchedMakeKey, models],
+  );
+
+  function handleMakeChange(v: string) {
+    setMake(v);
+    if (!modelLocked) {
+      const next = matchedMakeKeyFor(v, makeOptions);
+      const nextModels = next ? (models[next] ?? []) : [];
+      if (model && !nextModels.some((m) => norm(m) === norm(model))) {
+        setModel("");
+      }
+    }
+  }
 
   const canSubmit =
     !disabled &&
@@ -191,20 +274,25 @@ export default function GuessForm({
       style={{ display: "flex", flexDirection: "column", gap: 10 }}
       onKeyDown={onKeyDown}
     >
-      <BrandCombobox
+      <Combobox
+        label="Make"
         value={make}
-        onChange={setMake}
+        onChange={handleMakeChange}
+        options={makeOptions}
+        placeholder="Search brand…"
         disabled={disabled || makeLocked}
       />
-      <FieldShell label="Model">
-        <input
-          value={model}
-          disabled={disabled || modelLocked}
-          onChange={(e) => setModel(e.target.value)}
-          placeholder="e.g. M3, Civic, F-150"
-          style={inputStyle}
-        />
-      </FieldShell>
+      <Combobox
+        label="Model"
+        value={model}
+        onChange={setModel}
+        options={modelOptions}
+        placeholder={matchedMakeKey ? "Search model…" : "Pick a make first"}
+        disabled={disabled || modelLocked || !matchedMakeKey}
+        emptyHint={
+          matchedMakeKey ? "No models listed" : "Pick a make first"
+        }
+      />
       <FieldShell label="Year">
         <input
           value={year}
@@ -277,4 +365,9 @@ export default function GuessForm({
       </button>
     </div>
   );
+}
+
+function matchedMakeKeyFor(v: string, options: string[]): string {
+  const n = norm(v);
+  return options.find((m) => norm(m) === n) ?? "";
 }

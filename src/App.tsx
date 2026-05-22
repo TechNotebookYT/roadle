@@ -1,23 +1,40 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Game from "./components/Game";
-import { loadManifest, selectTodaysPuzzle } from "./lib/manifest";
+import { loadManifest } from "./lib/manifest";
+import { loadModelCatalog, type ModelCatalog } from "./lib/models";
+import { loadGameState } from "./lib/storage";
 import type { Puzzle } from "./types/game";
 
+function computeCompletedIds(puzzles: Puzzle[]): string[] {
+  return puzzles
+    .filter((p) => {
+      const s = loadGameState(p.id);
+      return s !== null && s.status !== "playing";
+    })
+    .map((p) => p.id);
+}
+
 function App() {
-  const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
+  const [puzzles, setPuzzles] = useState<Puzzle[]>([]);
+  const [models, setModels] = useState<ModelCatalog>({});
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loadError, setLoadError] = useState(false);
+  const [completedTick, setCompletedTick] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    loadManifest()
-      .then((puzzles) => {
+    Promise.all([loadManifest(), loadModelCatalog()])
+      .then(([p, m]) => {
         if (cancelled) return;
-        const today = selectTodaysPuzzle(puzzles);
-        if (!today) {
+        if (p.length === 0) {
           setLoadError(true);
           return;
         }
-        setPuzzle(today);
+        setPuzzles(p);
+        setModels(m);
+        const completed = new Set(computeCompletedIds(p));
+        const firstUncompleted = p.find((x) => !completed.has(x.id));
+        setSelectedId((firstUncompleted ?? p[0]).id);
       })
       .catch(() => {
         if (!cancelled) setLoadError(true);
@@ -27,13 +44,31 @@ function App() {
     };
   }, []);
 
-  if (loadError) {
-    return <CenteredMessage text="No puzzle available." />;
-  }
-  if (!puzzle) {
-    return <CenteredMessage text="Loading…" />;
-  }
-  return <Game puzzle={puzzle} />;
+  const completedIds = useMemo(
+    () => computeCompletedIds(puzzles),
+    // completedTick is a manual refresh trigger from Game state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [puzzles, completedTick],
+  );
+
+  const refreshCompleted = useCallback(() => {
+    setCompletedTick((n) => n + 1);
+  }, []);
+
+  if (loadError) return <CenteredMessage text="No puzzles available." />;
+  const puzzle = puzzles.find((p) => p.id === selectedId);
+  if (!puzzle || !selectedId) return <CenteredMessage text="Loading…" />;
+
+  return (
+    <Game
+      puzzle={puzzle}
+      puzzles={puzzles}
+      models={models}
+      completedIds={completedIds}
+      onSelectPuzzle={setSelectedId}
+      onGameUpdate={refreshCompleted}
+    />
+  );
 }
 
 function CenteredMessage({ text }: { text: string }) {

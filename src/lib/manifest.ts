@@ -1,15 +1,18 @@
 import type { Puzzle } from "../types/game";
 import { fallbackPuzzles } from "../data/fallbackPuzzles";
 
-const DEFAULT_MANIFEST_URL = "/puzzles.json";
+const DEFAULT_MANIFEST_URL =
+  "https://raw.githubusercontent.com/TechNotebookYT/roadle_gamefiles/refs/heads/main/puzzles.json";
 
 export function manifestUrl(): string {
-  return import.meta.env.VITE_MANIFEST_URL ?? DEFAULT_MANIFEST_URL;
+  const base = import.meta.env.VITE_MANIFEST_URL ?? DEFAULT_MANIFEST_URL;
+  const sep = base.includes("?") ? "&" : "?";
+  return `${base}${sep}t=${Date.now()}`;
 }
 
 export async function loadManifest(): Promise<Puzzle[]> {
   try {
-    const res = await fetch(manifestUrl(), { cache: "no-cache" });
+    const res = await fetch(manifestUrl(), { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data: unknown = await res.json();
     const valid = validateManifest(data);
