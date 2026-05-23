@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Dot } from "./atoms";
 import type { DotState } from "./atoms";
 import type { GuessResult } from "../types/game";
+import { useMediaQuery } from "../lib/useMediaQuery";
 
 function feedbackToDot(state: "correct" | "close" | "wrong"): DotState {
   return state;
@@ -58,7 +59,11 @@ export default function GuessGrid({
   guesses: GuessResult[];
   maxAttempts: number;
 }) {
-  const rows = Array.from({ length: maxAttempts }, (_, i) => guesses[i]);
+  const isMobile = useMediaQuery("(max-width: 880px)");
+  const visibleCount = isMobile
+    ? Math.min(maxAttempts, guesses.length + 1)
+    : maxAttempts;
+  const rows = Array.from({ length: visibleCount }, (_, i) => guesses[i]);
   const [animatingRow, setAnimatingRow] = useState<number | null>(null);
   const prevCount = useRef(guesses.length);
 

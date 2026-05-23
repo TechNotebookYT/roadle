@@ -106,12 +106,6 @@ body {
   }
 }
 
-/* Mobile: guess grid expands one row at a time — show only the next empty row */
-@media (max-width: 880px) {
-  .roadle-guess-grid [data-empty="true"] ~ [data-empty="true"] {
-    display: none;
-  }
-}
 
 * {
   box-sizing: border-box;
