@@ -80,6 +80,7 @@ export default function GuessGrid({
 
   return (
     <div
+      className="roadle-guess-grid"
       style={{
         borderRadius: 20,
         background: "var(--surface)",
@@ -118,6 +119,7 @@ export default function GuessGrid({
         return (
           <div
             key={i}
+            data-empty={g ? "false" : "true"}
             style={{
               display: "grid",
               gridTemplateColumns: "38px 1fr 1fr 1fr",

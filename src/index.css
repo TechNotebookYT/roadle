@@ -48,14 +48,68 @@ body {
 @media (max-width: 880px) {
   .roadle-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 18px;
   }
   .roadle-left {
     position: static;
     top: auto;
+    gap: 14px;
   }
   .roadle-shell {
-    padding: 14px 18px 56px;
+    padding: 12px 14px 48px;
+  }
+}
+
+/* Compress vertically on shorter desktop screens */
+@media (min-width: 881px) and (max-height: 820px) {
+  .roadle-shell {
+    padding: 16px 24px 36px;
+  }
+  .roadle-grid {
+    gap: 24px;
+  }
+  .roadle-left {
+    gap: 14px;
+    top: 14px;
+  }
+  .roadle-right {
+    gap: 10px;
+  }
+}
+
+@media (min-width: 881px) and (max-height: 720px) {
+  .roadle-shell {
+    padding: 10px 22px 28px;
+  }
+  .roadle-grid {
+    gap: 20px;
+  }
+  .roadle-left {
+    gap: 10px;
+    top: 8px;
+  }
+  .roadle-right {
+    gap: 8px;
+  }
+}
+
+/* Mobile chip compactness — hide secondary labels so chips fit on one row */
+@media (max-width: 540px) {
+  .roadle-chip-label {
+    display: none;
+  }
+  .roadle-picker-suffix {
+    display: none;
+  }
+  .roadle-picker-name {
+    display: none;
+  }
+}
+
+/* Mobile: guess grid expands one row at a time — show only the next empty row */
+@media (max-width: 880px) {
+  .roadle-guess-grid [data-empty="true"] ~ [data-empty="true"] {
+    display: none;
   }
 }
 

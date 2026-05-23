@@ -110,6 +110,7 @@ export default function HeaderBar({
             {selectedIndex + 1}
           </span>
           <span
+            className="roadle-picker-name"
             style={{
               fontSize: 13,
               fontWeight: 600,
@@ -119,6 +120,7 @@ export default function HeaderBar({
             Game {selectedIndex + 1}
           </span>
           <span
+            className="roadle-picker-suffix"
             style={{
               fontFamily: "var(--ui)",
               fontSize: 11,
@@ -360,6 +362,7 @@ function StatChip({
         {value}
       </span>
       <span
+        className="roadle-chip-label"
         style={{
           fontFamily: "var(--ui)",
           fontSize: 11,

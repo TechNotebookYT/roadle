@@ -152,18 +152,40 @@ export default function Game({
               padding: "4px 4px 0",
             }}
           >
-            <h2
+            <div
               style={{
-                margin: 0,
-                fontFamily: "var(--display)",
-                fontSize: 20,
-                fontWeight: 700,
-                letterSpacing: "-.025em",
-                color: "var(--ink)",
+                display: "flex",
+                alignItems: "baseline",
+                gap: 10,
+                minWidth: 0,
               }}
             >
-              Your guesses
-            </h2>
+              <h2
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--display)",
+                  fontSize: 20,
+                  fontWeight: 700,
+                  letterSpacing: "-.025em",
+                  color: "var(--ink)",
+                }}
+              >
+                Your guesses
+              </h2>
+              <span
+                style={{
+                  fontFamily: "var(--ui)",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: "var(--muted)",
+                  letterSpacing: "-.005em",
+                  fontStyle: "italic",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                make your guesses below
+              </span>
+            </div>
             <span
               style={{
                 fontFamily: "var(--mono)",
